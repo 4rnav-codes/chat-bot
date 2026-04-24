@@ -1,9 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-
-app = Flask(__name__)
-
-# Simple chatbot logic
-from flask import Flask, render_template, request, jsonify
 import random
 
 app = Flask(__name__)
