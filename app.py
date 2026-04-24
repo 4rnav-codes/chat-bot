@@ -3,25 +3,55 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
 # Simple chatbot logic
-def get_response(user_input):
-    user_input = user_input.lower()
+from flask import Flask, render_template, request, jsonify
+import random
 
-    if "hello" in user_input:
-        return "Hi there! How can I help you?"
-    elif "how are you" in user_input:
-        return "I am fine 😊 What about you?"
-    elif "name" in user_input:
-        return "I am your AI Chatbot!"
-    elif"college timing" in user_input:
-        return "College timing was 10AM to 5PM "
-    elif "college fee" in user_input:
-        return "fee was Rs.11001 per year"
-    elif "Branch available in college" in user_input:
-        return "Available Branches are 1:- C.S.E. \n 2:- E.E. \n 3:- electrical engineering"
-    elif "bye" in user_input:
-        return "Goodbye! Have a nice day 😊"
+app = Flask(__name__)
+
+responses = {
+    "greeting": [
+        "Hello! How can I help you today?",
+        "Hi there 😊 Welcome to college chatbot!",
+        "Hey! Ask me anything about college."
+    ],
+    "admission": [
+        "Admissions are open now. Visit college office or website.",
+        "You can apply online through the portal."
+    ],
+    "courses": [
+        "We offer CSE, IT, Mechanical, Civil and Electrical.",
+        "Diploma and degree courses are available."
+    ],
+    "fees": [
+        "Fees approx ₹30,000 - ₹70,000 per year.",
+        "Contact accounts office for exact fees."
+    ],
+    "bye": [
+        "Goodbye 👋",
+        "See you later 😊"
+    ]
+}
+
+def get_response(message):
+    message = message.lower()
+
+    if any(word in message for word in ["hello", "hi", "hey"]):
+        return random.choice(responses["greeting"])
+
+    elif "admission" in message:
+        return random.choice(responses["admission"])
+
+    elif "course" in message:
+        return random.choice(responses["courses"])
+
+    elif "fee" in message:
+        return random.choice(responses["fees"])
+
+    elif "bye" in message:
+        return random.choice(responses["bye"])
+
     else:
-        return "Sorry, I don't understand that."
+        return "Sorry 🤖 I don't understand that."
 
 @app.route("/")
 def home():
@@ -30,8 +60,7 @@ def home():
 @app.route("/get", methods=["POST"])
 def chat():
     user_message = request.json["message"]
-    response = get_response(user_message)
-    return jsonify({"reply": response})
+    return jsonify({"reply": get_response(user_message)})
 
 if __name__ == "__main__":
     app.run(debug=True)
