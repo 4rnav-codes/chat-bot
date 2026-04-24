@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot AI</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+        }
+
+        .chatbox {
+            width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #chat {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 75%;
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px;
+        }
+
+        .user {
+            color: blue;
+        }
+
+        .bot {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chatbox">
+    <h2>AI Chatbot 🤖</h2>
+
+    <div id="chat"></div>
+
+    <input type="text" id="msg" placeholder="Type message...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+function sendMessage() {
+    let msg = document.getElementById("msg").value;
+
+    if (msg === "") return;
+
+    let chat = document.getElementById("chat");
+
+    chat.innerHTML += "<p class='user'><b>You:</b> " + msg + "</p>";
+
+    fetch("/get", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(res => res.json())
+    .then(data => {
+        chat.innerHTML += "<p class='bot'><b>Bot:</b> " + data.reply + "</p>";
+        document.getElementById("msg").value = "";
+        chat.scrollTop = chat.scrollHeight;
+    });
+}
+</script>
+
+</body>
+</html>
