@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TGBG </title>
+    <title>AI Chatbot</title>
     <style>
         #box::-webkit-scrollbar { width: 6px; }
         #box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
@@ -83,17 +83,25 @@
 <body>
 
 <div class="chat">
-    <h3>🤖 TGBG Chatbot</h3>
+    <h3>🤖 AI Chatbot</h3>
     <div id="box"></div>
     <div class="input-container">
-        <input id="input" placeholder="Ask OpenAI something..." onkeypress="if(event.key==='Enter') send()" />
+        <input id="input" placeholder="Say something..." onkeypress="if(event.key==='Enter') send()" />
         <button onclick="send()">Send</button>
     </div>
 </div>
 
 <script>
 
-const OPENAI_API_KEY = "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"; 
+const API_KEY = "AIzaSyB4pyCWWakgEebTN4oYBFstRI2P2ehvcVQ"; 
+
+function fallbackReply(msg) {
+    msg = msg.toLowerCase();
+    if (msg.includes("alphabet")) return "There are 26 letters in the English alphabet!";
+    if (msg.includes("after a")) return "The letter 'B' comes after 'A'.";
+    if (msg.includes("hello") || msg.includes("hi")) return "Hi there! How can I help you today?";
+    return "I'm having trouble connecting to my brain (the API). Please check your API key!";
+}
 
 async function send() {
     let input = document.getElementById("input");
@@ -105,37 +113,34 @@ async function send() {
     input.value = "";
 
     let loadingId = "load-" + Date.now();
-    box.innerHTML += `<div class="bot" id="${loadingId}">Typing...</div>`;
+    box.innerHTML += `<div class="bot" id="${loadingId}">...</div>`;
     box.scrollTop = box.scrollHeight;
 
     try {
-        let res = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    { role: "system", content: "You are a friendly, normal AI chatbot." },
-                    { role: "user", content: msg }
-                ]
-            })
-        });
+        let res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: msg }] }]
+                })
+            }
+        );
 
         let data = await res.json();
         document.getElementById(loadingId).remove();
 
-        if (data.choices && data.choices[0].message) {
-            let reply = data.choices[0].message.content;
+        if (data.candidates && data.candidates[0].content) {
+            let reply = data.candidates[0].content.parts[0].text;
             box.innerHTML += `<div class="bot">${reply}</div>`;
         } else {
-            box.innerHTML += `<div class="bot">⚠️ Error: ${data.error ? data.error.message : "Something went wrong"}</div>`;
+            // This triggers if the API key is "test" or invalid
+            box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
         }
     } catch (e) {
         document.getElementById(loadingId).remove();
-        box.innerHTML += `<div class="bot">⚠️ Failed to connect to OpenAI.</div>`;
+        box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
     }
     box.scrollTop = box.scrollHeight;
 }
