@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
     <style>
-        /* Custom Scrollbar */
-        #box::-webkit-scrollbar {
-            width: 6px;
-        }
-        #box::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
+        #box::-webkit-scrollbar { width: 6px; }
+        #box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
         body {
             background: radial-gradient(circle at top left, #1e293b, #0f172a);
             color: #f8fafc;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,7 +24,6 @@
             height: 600px;
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             padding: 24px;
             border-radius: 28px;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -39,106 +32,52 @@
             flex-direction: column;
         }
 
-        h3 {
-            margin-top: 0;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 15px;
-            color: #f1f5f9;
-        }
+        h3 { margin: 0 0 15px 0; font-size: 1.3rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; }
 
         #box {
             flex-grow: 1;
             overflow-y: auto;
             margin-bottom: 20px;
-            padding-right: 8px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
-        /* Message Bubbles */
         .user, .bot {
-            max-width: 85%;
+            max-width: 80%;
             padding: 12px 16px;
-            border-radius: 20px;
+            border-radius: 18px;
             font-size: 0.95rem;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease-out forwards;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
         }
 
         .user {
             align-self: flex-end;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            background: #6366f1;
             color: white;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .bot {
             align-self: flex-start;
-            background: rgba(255, 255, 255, 0.08);
-            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.1);
             border-bottom-left-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .loading {
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            font-style: italic;
-            font-size: 0.85rem;
-            padding: 0;
-        }
-
-        /* Input Area */
         .input-container {
             display: flex;
             gap: 10px;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 8px 8px 8px 16px;
-            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 8px;
+            border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: border-color 0.2s;
         }
 
-        .input-container:focus-within {
-            border-color: #6366f1;
-        }
+        input { flex-grow: 1; background: transparent; border: none; color: white; outline: none; padding-left: 10px; }
+        button { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; }
 
-        input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            outline: none;
-            font-size: 0.95rem;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 14px;
-            border: none;
-            background: #6366f1;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        button:hover {
-            background: #818cf8;
-            transform: translateY(-1px);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -146,27 +85,22 @@
 <div class="chat">
     <h3>🤖 AI Chatbot</h3>
     <div id="box"></div>
-
     <div class="input-container">
-        <input id="input" placeholder="Type a message..." onkeypress="handleKeyPress(event)" />
+        <input id="input" placeholder="Say something..." onkeypress="if(event.key==='Enter') send()" />
         <button onclick="send()">Send</button>
     </div>
 </div>
 
 <script>
-const API_KEY = "AIzaSyDkAXxLnGsXMlf2VXlTreLcNVm9qqJvhe4"; 
 
-function handleKeyPress(e) {
-    if (e.key === "Enter") send();
-}
+const API_KEY = "AIzaSyC7S4epmZIQLYt38QBwWJ2kkipmqSY1OIc"; 
 
 function fallbackReply(msg) {
     msg = msg.toLowerCase();
-    if (msg.includes("hello") || msg.includes("hi")) return "Hey there! What's on your mind?";
-    if (msg.includes("who are you")) return "I'm a simple AI chatbot built to chat with you!";
-    if (msg.includes("help")) return "I can chat about anything! Just type something and let's talk.";
-    
-    return "That's interesting! Tell me more about that.";
+    if (msg.includes("alphabet")) return "There are 26 letters in the English alphabet!";
+    if (msg.includes("after a")) return "The letter 'B' comes after 'A'.";
+    if (msg.includes("hello") || msg.includes("hi")) return "Hi there! How can I help you today?";
+    return "I'm having trouble connecting to my brain (the API). Please check your API key!";
 }
 
 async function send() {
@@ -175,52 +109,41 @@ async function send() {
     if (!msg) return;
 
     let box = document.getElementById("box");
-
-    // Add User Message
     box.innerHTML += `<div class="user">${msg}</div>`;
     input.value = "";
 
-    // Add Loading Indicator
     let loadingId = "load-" + Date.now();
-    box.innerHTML += `<div class="bot loading" id="${loadingId}">Thinking...</div>`;
+    box.innerHTML += `<div class="bot" id="${loadingId}">...</div>`;
     box.scrollTop = box.scrollHeight;
 
     try {
         let res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
             {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: "You are a friendly, normal AI chatbot. Keep your answers natural and conversational.\nUser: " + msg
-                        }]
-                    }]
+                    contents: [{ parts: [{ text: msg }] }]
                 })
             }
         );
 
         let data = await res.json();
-        let reply = "";
-
-        if (data.candidates && data.candidates.length > 0) {
-            reply = data.candidates[0].content.parts.map(p => p.text).join(" ");
-        } else {
-            reply = fallbackReply(msg);
-        }
-
         document.getElementById(loadingId).remove();
-        box.innerHTML += `<div class="bot">${reply}</div>`;
-        box.scrollTop = box.scrollHeight;
 
+        if (data.candidates && data.candidates[0].content) {
+            let reply = data.candidates[0].content.parts[0].text;
+            box.innerHTML += `<div class="bot">${reply}</div>`;
+        } else {
+            // This triggers if the API key is "test" or invalid
+            box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
+        }
     } catch (e) {
-        if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+        document.getElementById(loadingId).remove();
         box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
-        box.scrollTop = box.scrollHeight;
     }
+    box.scrollTop = box.scrollHeight;
 }
 </script>
-
 </body>
 </html>
