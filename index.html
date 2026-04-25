@@ -1,78 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gemini Chatbot</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .chat-container {
-            width: 400px;
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        .chat-box {
-            height: 400px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-        }
-        .msg { margin: 8px 0; }
-        .user { text-align: right; color: #38bdf8; }
-        .bot { text-align: left; color: #22c55e; }
-
-        input {
-            width: 75%;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-        }
-        button {
-            padding: 10px;
-            border: none;
-            background: #38bdf8;
-            color: black;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Tathagat Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="chat-container">
-        <h3>🤖 Gemini Chatbot</h3>
-        <div class="chat-box" id="chat"></div>
-        <input id="msg" placeholder="Type a message..." />
-        <button onclick="send()">Send</button>
+
+<div class="chat-container">
+    <h2>🎓 Tathagat AI Assistant</h2>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Ask something..." />
+        <button onclick="sendMessage()">Send</button>
     </div>
+</div>
 
 <script>
-async function send() {
-    let input = document.getElementById("msg");
-    let chat = document.getElementById("chat");
+async function sendMessage() {
+    let input = document.getElementById("user-input");
+    let message = input.value;
 
-    let userText = input.value;
-    if (!userText) return;
+    if (!message) return;
 
-    chat.innerHTML += `<div class="msg user">${userText}</div>`;
-    input.value = "";
+    let chatBox = document.getElementById("chat-box");
+
+    chatBox.innerHTML += `<div class="user">${message}</div>`;
 
     let res = await fetch("/chat", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: userText})
+        body: JSON.stringify({message})
     });
 
     let data = await res.json();
-    chat.innerHTML += `<div class="msg bot">${data.reply}</div>`;
-    chat.scrollTop = chat.scrollHeight;
+
+    chatBox.innerHTML += `<div class="bot">${data.reply}</div>`;
+
+    input.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 </script>
+
 </body>
 </html>
