@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, jsonify
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv()
 
@@ -11,11 +11,11 @@ app = Flask(__name__)
 
 limiter = Limiter(get_remote_address, app=app, default_limits=["10 per minute"])
 
-genai.configure(api_key=os.getenv("AIzaSyBICKj3JVvhgJAlbA153Cfrzqh4Dqtg1Lw"))
+genai.configure(api_key=os.getenv("AIzaSyBNQgqfuY9oJy2XACIwy9Cm37HY1H5X9z8"))
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
@@ -25,9 +25,11 @@ def chat():
 
     try:
         response = model.generate_content(user_msg)
-        return jsonify({"reply": response.text})
+        reply = response.text
     except Exception as e:
-        return jsonify({"reply": "Error: " + str(e)}), 500
+        reply = "Error: " + str(e)
+
+    return jsonify({"reply": reply})
 
 if __name__ == "__main__":
     app.run(debug=True)
