@@ -25,6 +25,7 @@
     }
     .user { text-align: right; color: #38bdf8; margin: 5px; }
     .bot { text-align: left; color: #a78bfa; margin: 5px; }
+    .loading { color: #facc15; font-style: italic; }
     input {
       width: 75%;
       padding: 8px;
@@ -51,7 +52,18 @@
 </div>
 
 <script>
-const API_KEY = "AIzaSyBICKj3JVvhgJAlbA153Cfrzqh4Dqtg1Lw"; 
+const API_KEY = "AIzaSyBICKj3JVvhgJAlbA153Cfrzqh4Dqtg1Lw";
+
+function fallbackReply(msg) {
+  msg = msg.toLowerCase();
+
+  if (msg.includes("admission")) return "Admissions usually start in June. Visit college office.";
+  if (msg.includes("fees")) return "Fees vary by course. Contact admin office.";
+  if (msg.includes("course")) return "We offer BSc, BA, BCom and more.";
+  if (msg.includes("hello") || msg.includes("hi")) return "Hello! How can I help you?";
+  
+  return "I'm your college assistant. Ask about admissions, fees, or courses.";
+}
 
 async function send() {
   let input = document.getElementById("input");
@@ -59,9 +71,13 @@ async function send() {
   if (!msg) return;
 
   let box = document.getElementById("box");
-  box.innerHTML += `<div class="user">${msg}</div>`;
 
+  box.innerHTML += `<div class="user">${msg}</div>`;
   input.value = "";
+
+  let loadingId = "load-" + Date.now();
+  box.innerHTML += `<div class="bot loading" id="${loadingId}">Typing...</div>`;
+  box.scrollTop = box.scrollHeight;
 
   try {
     let res = await fetch(
@@ -70,22 +86,37 @@ async function send() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          contents: [{ parts: [{ text: msg }] }]
+          contents: [{
+            parts: [{
+              text: "You are a helpful college assistant. Answer briefly.\nUser: " + msg
+            }]
+          }]
         })
       }
     );
 
     let data = await res.json();
+    console.log(data);
 
-    let reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response";
+    let reply = "";
 
+    if (data.candidates && data.candidates.length > 0) {
+      reply = data.candidates[0].content.parts
+        .map(p => p.text)
+        .join(" ");
+    } else if (data.error) {
+      reply = "API Error: " + data.error.message;
+    } else {
+      reply = fallbackReply(msg);
+    }
+
+    document.getElementById(loadingId).remove();
     box.innerHTML += `<div class="bot">${reply}</div>`;
     box.scrollTop = box.scrollHeight;
 
   } catch (e) {
-    box.innerHTML += `<div class="bot">Error: ${e.message}</div>`;
+    document.getElementById(loadingId).remove();
+    box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
   }
 }
 </script>
