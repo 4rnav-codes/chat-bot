@@ -1,249 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>AI Chatbot Pro</title>
+    <title>Gemini Chatbot</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 400px;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .msg { margin: 8px 0; }
+        .user { text-align: right; color: #38bdf8; }
+        .bot { text-align: left; color: #22c55e; }
 
-<style>
-:root {
-    --bg: #f0f0f0;
-    --chat-bg: #fff;
-    --text: #000;
-    --user: #DCF8C6;
-    --bot: #fff;
-}
-
-/* 🌙 ChatGPT Dark */
-body.dark {
-    --bg: #202123;
-    --chat-bg: #343541;
-    --text: #fff;
-    --user: #056162;
-    --bot: #444654;
-}
-
-/* 🌌 Glass */
-body.glass {
-    --bg: linear-gradient(135deg,#74ebd5,#ACB6E5);
-    --chat-bg: rgba(255,255,255,0.15);
-    --text: #000;
-}
-
-/* ⚡ Neon */
-body.neon {
-    --bg: #0f172a;
-    --chat-bg: #020617;
-    --text: #0ff;
-    --user: #22c55e;
-    --bot: #1e293b;
-}
-
-body {
-    margin: 0;
-    font-family: Arial;
-    background: var(--bg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-/* 💬 Container */
-.chat-container {
-    width: 420px;
-    height: 600px;
-    background: var(--chat-bg);
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    backdrop-filter: blur(10px);
-}
-
-/* Header */
-.header {
-    padding: 12px;
-    text-align: center;
-    font-weight: bold;
-    background: #4CAF50;
-    color: white;
-    position: relative;
-}
-
-/* Theme buttons */
-.themes {
-    position: absolute;
-    right: 10px;
-    top: 5px;
-}
-
-.themes button {
-    margin: 2px;
-    padding: 5px;
-    border: none;
-    cursor: pointer;
-}
-
-/* Chat */
-#chat {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-}
-
-/* Messages */
-.msg {
-    display: flex;
-    margin: 8px 0;
-}
-
-.user { justify-content: flex-end; }
-.bot { justify-content: flex-start; }
-
-.bubble {
-    max-width: 70%;
-    padding: 10px;
-    border-radius: 10px;
-    color: var(--text);
-}
-
-.user .bubble { background: var(--user); }
-.bot .bubble { background: var(--bot); }
-
-/* Input */
-.input-area {
-    display: flex;
-    padding: 10px;
-}
-
-input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 20px;
-    border: none;
-}
-
-button.send {
-    margin-left: 10px;
-    padding: 10px;
-    border: none;
-    background: #4CAF50;
-    color: white;
-    border-radius: 50%;
-}
-
-/* typing dots */
-.dot {
-    height: 6px;
-    width: 6px;
-    margin: 0 2px;
-    background-color: var(--text);
-    border-radius: 50%;
-    display: inline-block;
-    animation: blink 1.2s infinite;
-}
-
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes blink {
-    0% {opacity: 0.2;}
-    50% {opacity: 1;}
-    100% {opacity: 0.2;}
-}
-</style>
+        input {
+            width: 75%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            background: #38bdf8;
+            color: black;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
 </head>
-
-<body class="glass">
-
-<div class="chat-container">
-
-    <div class="header">
-        🤖 AI Chatbot
-        
-        <div class="themes">
-            <button onclick="setTheme('glass')">🌌</button>
-            <button onclick="setTheme('dark')">🌙</button>
-            <button onclick="setTheme('neon')">⚡</button>
-        </div>
+<body>
+    <div class="chat-container">
+        <h3>🤖 Gemini Chatbot</h3>
+        <div class="chat-box" id="chat"></div>
+        <input id="msg" placeholder="Type a message..." />
+        <button onclick="send()">Send</button>
     </div>
-
-    <div id="chat"></div>
-
-    <div class="input-area">
-        <input type="text" id="msg" placeholder="Ask something...">
-        <button class="send" onclick="sendMessage()">➤</button>
-    </div>
-
-</div>
 
 <script>
-
-function setTheme(theme) {
-    document.body.className = theme;
-}
-
-function addMessage(text, type) {
+async function send() {
+    let input = document.getElementById("msg");
     let chat = document.getElementById("chat");
 
-    let msg = document.createElement("div");
-    msg.classList.add("msg", type);
+    let userText = input.value;
+    if (!userText) return;
 
-    let bubble = document.createElement("div");
-    bubble.classList.add("bubble");
-    bubble.innerText = text;
+    chat.innerHTML += `<div class="msg user">${userText}</div>`;
+    input.value = "";
 
-    msg.appendChild(bubble);
-    chat.appendChild(msg);
+    let res = await fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: userText})
+    });
 
+    let data = await res.json();
+    chat.innerHTML += `<div class="msg bot">${data.reply}</div>`;
     chat.scrollTop = chat.scrollHeight;
 }
-
-function showTyping() {
-    let chat = document.getElementById("chat");
-
-    let msg = document.createElement("div");
-    msg.classList.add("msg", "bot");
-    msg.id = "typing";
-
-    let bubble = document.createElement("div");
-    bubble.classList.add("bubble");
-    bubble.innerHTML = `
-        typing
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-    `;
-
-    msg.appendChild(bubble);
-    chat.appendChild(msg);
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-function sendMessage() {
-    let msg = document.getElementById("msg").value;
-    if (msg === "") return;
-
-    addMessage(msg, "user");
-    document.getElementById("msg").value = "";
-
-    showTyping();
-
-    setTimeout(() => {
-        fetch("/get", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: msg})
-        })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("typing").remove();
-            addMessage(data.reply, "bot");
-        });
-    }, 1200);
-}
-
 </script>
-
 </body>
 </html>
