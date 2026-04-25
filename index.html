@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tathagat AI Assistant</title>
+    <title>AI Chatbot</title>
     <style>
         /* Custom Scrollbar */
         #box::-webkit-scrollbar {
@@ -144,17 +144,17 @@
 <body>
 
 <div class="chat">
-    <h3>🎓 Tathagat AI Assistant</h3>
+    <h3>🤖 AI Chatbot</h3>
     <div id="box"></div>
 
     <div class="input-container">
-        <input id="input" placeholder="Ask about admissions, fees..." onkeypress="handleKeyPress(event)" />
+        <input id="input" placeholder="Type a message..." onkeypress="handleKeyPress(event)" />
         <button onclick="send()">Send</button>
     </div>
 </div>
 
 <script>
-const API_KEY = "AIzaSyDkAXxLnGsXMlf2VXlTreLcNVm9qqJvhe4";
+const API_KEY = "AIzaSyDkAXxLnGsXMlf2VXlTreLcNVm9qqJvhe4"; 
 
 function handleKeyPress(e) {
     if (e.key === "Enter") send();
@@ -162,12 +162,11 @@ function handleKeyPress(e) {
 
 function fallbackReply(msg) {
     msg = msg.toLowerCase();
-    if (msg.includes("admission")) return "Admissions usually start in June. You can apply online or visit the college office.";
-    if (msg.includes("fees")) return "Fees vary by course. Please contact the administration office for the latest fee structure.";
-    if (msg.includes("course")) return "We offer various programs including BSc, BA, BCom, and specialized vocational courses.";
-    if (msg.includes("hello") || msg.includes("hi")) return "Hello! I'm your Tathagat College assistant. How can I help you today?";
+    if (msg.includes("hello") || msg.includes("hi")) return "Hey there! What's on your mind?";
+    if (msg.includes("who are you")) return "I'm a simple AI chatbot built to chat with you!";
+    if (msg.includes("help")) return "I can chat about anything! Just type something and let's talk.";
     
-    return "I'm your college assistant. Ask me about admissions, fees, or available courses!";
+    return "That's interesting! Tell me more about that.";
 }
 
 async function send() {
@@ -183,7 +182,7 @@ async function send() {
 
     // Add Loading Indicator
     let loadingId = "load-" + Date.now();
-    box.innerHTML += `<div class="bot loading" id="${loadingId}">Tathagat AI is typing...</div>`;
+    box.innerHTML += `<div class="bot loading" id="${loadingId}">Thinking...</div>`;
     box.scrollTop = box.scrollHeight;
 
     try {
@@ -195,7 +194,7 @@ async function send() {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: "You are a helpful college assistant for Tathagat College. Answer briefly.\nUser: " + msg
+                            text: "You are a friendly, normal AI chatbot. Keep your answers natural and conversational.\nUser: " + msg
                         }]
                     }]
                 })
