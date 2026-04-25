@@ -1,123 +1,225 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tathagat AI Assistant</title>
-  <style>
-    body {
-      background: #0f172a;
-      color: white;
-      font-family: Arial;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .chat {
-      width: 400px;
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 12px;
-    }
-    #box {
-      height: 300px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-    .user { text-align: right; color: #38bdf8; margin: 5px; }
-    .bot { text-align: left; color: #a78bfa; margin: 5px; }
-    .loading { color: #facc15; font-style: italic; }
-    input {
-      width: 75%;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-    }
-    button {
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      background: #6366f1;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tathagat AI Assistant</title>
+    <style>
+        /* Custom Scrollbar */
+        #box::-webkit-scrollbar {
+            width: 6px;
+        }
+        #box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: #f8fafc;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .chat {
+            width: 420px;
+            height: 600px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 24px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h3 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            color: #f1f5f9;
+        }
+
+        #box {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Message Bubbles */
+        .user, .bot {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .bot {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 0.85rem;
+            padding: 0;
+        }
+
+        /* Input Area */
+        .input-container {
+            display: flex;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 8px 8px 8px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: border-color 0.2s;
+        }
+
+        .input-container:focus-within {
+            border-color: #6366f1;
+        }
+
+        input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 14px;
+            border: none;
+            background: #6366f1;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #818cf8;
+            transform: translateY(-1px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
 <div class="chat">
-  <h3>🎓 Tathagat AI Assistant</h3>
-  <div id="box"></div>
+    <h3>🎓 Tathagat AI Assistant</h3>
+    <div id="box"></div>
 
-  <input id="input" placeholder="Ask something..." />
-  <button onclick="send()">Send</button>
+    <div class="input-container">
+        <input id="input" placeholder="Ask about admissions, fees..." onkeypress="handleKeyPress(event)" />
+        <button onclick="send()">Send</button>
+    </div>
 </div>
 
 <script>
 const API_KEY = "AIzaSyDkAXxLnGsXMlf2VXlTreLcNVm9qqJvhe4";
 
-function fallbackReply(msg) {
-  msg = msg.toLowerCase();
+function handleKeyPress(e) {
+    if (e.key === "Enter") send();
+}
 
-  if (msg.includes("admission")) return "Admissions usually start in June. Visit college office.";
-  if (msg.includes("fees")) return "Fees vary by course. Contact admin office.";
-  if (msg.includes("course")) return "We offer BSc, BA, BCom and more.";
-  if (msg.includes("hello") || msg.includes("hi")) return "Hello! How can I help you?";
-  
-  return "I'm your college assistant. Ask about admissions, fees, or courses.";
+function fallbackReply(msg) {
+    msg = msg.toLowerCase();
+    if (msg.includes("admission")) return "Admissions usually start in June. You can apply online or visit the college office.";
+    if (msg.includes("fees")) return "Fees vary by course. Please contact the administration office for the latest fee structure.";
+    if (msg.includes("course")) return "We offer various programs including BSc, BA, BCom, and specialized vocational courses.";
+    if (msg.includes("hello") || msg.includes("hi")) return "Hello! I'm your Tathagat College assistant. How can I help you today?";
+    
+    return "I'm your college assistant. Ask me about admissions, fees, or available courses!";
 }
 
 async function send() {
-  let input = document.getElementById("input");
-  let msg = input.value.trim();
-  if (!msg) return;
+    let input = document.getElementById("input");
+    let msg = input.value.trim();
+    if (!msg) return;
 
-  let box = document.getElementById("box");
+    let box = document.getElementById("box");
 
-  box.innerHTML += `<div class="user">${msg}</div>`;
-  input.value = "";
+    // Add User Message
+    box.innerHTML += `<div class="user">${msg}</div>`;
+    input.value = "";
 
-  let loadingId = "load-" + Date.now();
-  box.innerHTML += `<div class="bot loading" id="${loadingId}">Typing...</div>`;
-  box.scrollTop = box.scrollHeight;
-
-  try {
-    let res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: "You are a helpful college assistant. Answer briefly.\nUser: " + msg
-            }]
-          }]
-        })
-      }
-    );
-
-    let data = await res.json();
-    console.log(data);
-
-    let reply = "";
-
-    if (data.candidates && data.candidates.length > 0) {
-      reply = data.candidates[0].content.parts
-        .map(p => p.text)
-        .join(" ");
-    } else if (data.error) {
-      reply = "API Error: " + data.error.message;
-    } else {
-      reply = fallbackReply(msg);
-    }
-
-    document.getElementById(loadingId).remove();
-    box.innerHTML += `<div class="bot">${reply}</div>`;
+    // Add Loading Indicator
+    let loadingId = "load-" + Date.now();
+    box.innerHTML += `<div class="bot loading" id="${loadingId}">Tathagat AI is typing...</div>`;
     box.scrollTop = box.scrollHeight;
 
-  } catch (e) {
-    document.getElementById(loadingId).remove();
-    box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
-  }
+    try {
+        let res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: "You are a helpful college assistant for Tathagat College. Answer briefly.\nUser: " + msg
+                        }]
+                    }]
+                })
+            }
+        );
+
+        let data = await res.json();
+        let reply = "";
+
+        if (data.candidates && data.candidates.length > 0) {
+            reply = data.candidates[0].content.parts.map(p => p.text).join(" ");
+        } else {
+            reply = fallbackReply(msg);
+        }
+
+        document.getElementById(loadingId).remove();
+        box.innerHTML += `<div class="bot">${reply}</div>`;
+        box.scrollTop = box.scrollHeight;
+
+    } catch (e) {
+        if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+        box.innerHTML += `<div class="bot">${fallbackReply(msg)}</div>`;
+        box.scrollTop = box.scrollHeight;
+    }
 }
 </script>
 
