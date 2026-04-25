@@ -1,61 +1,48 @@
 from flask import Flask, render_template, request, jsonify
-import random
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import google.generativeai as genai
+import random, re
 
 app = Flask(__name__)
 
-responses = {
-    "greeting": [
-        "Hello! How can I help you today?",
-        "Hi there 😊 Welcome to college chatbot!",
-        "Hey! Ask me anything about college."
-    ],
-    "admission": [
-        "Admissions are open now. Visit college office or website.",
-        "You can apply online through the portal."
-    ],
-    "courses": [
-        "We offer CSE, IT, Mechanical, Civil and Electrical.",
-        "Diploma and degree courses are available."
-    ],
-    "fees": [
-        "Fees approx ₹30,000 - ₹70,000 per year.",
-        "Contact accounts office for exact fees."
-    ],
-    "bye": [
-        "Goodbye 👋",
-        "See you later 😊"
-    ]
-}
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=["50 per hour"] 
+)
 
-def get_response(message):
-    message = message.lower()
+genai.configure(api_key="AIzaSyBICKj3JVvhgJAlbA153Cfrzqh4Dqtg1Lw")
+model = genai.GenerativeModel("gemini-pro")
 
-    if any(word in message for word in ["hello", "hi", "hey"]):
-        return random.choice(responses["greeting"])
-
-    elif "admission" in message:
-        return random.choice(responses["admission"])
-
-    elif "course" in message:
-        return random.choice(responses["courses"])
-
-    elif "fee" in message:
-        return random.choice(responses["fees"])
-
-    elif "bye" in message:
-        return random.choice(responses["bye"])
-
-    else:
-        return "Sorry 🤖 I don't understand that."
+def gemini_reply(message):
+    try:
+        response = model.generate_content(
+            f"You are a helpful college assistant:\nUser: {message}"
+        )
+        return response.text
+    except:
+        return "AI is busy right now."
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 @app.route("/get", methods=["POST"])
+@limiter.limit("10 per minute") 
 def chat():
-    user_message = request.json["message"]
-    return jsonify({"reply": get_response(user_message)})
+    user_message = request.json.get("message", "")
+
+    if not user_message.strip():
+        return jsonify({"reply": "Type something first."})
+
+    return jsonify({"reply": gemini_reply(user_message)})
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        "reply": "Too many requests 🚫 Please slow down."
+    }), 429
 
 if __name__ == "__main__":
     app.run(debug=True)
