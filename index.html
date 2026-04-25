@@ -1,45 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tathagat Chatbot</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <title>Tathagat AI Assistant</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat {
+      width: 400px;
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 12px;
+    }
+    #box {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .user { text-align: right; color: #38bdf8; margin: 5px; }
+    .bot { text-align: left; color: #a78bfa; margin: 5px; }
+    input {
+      width: 75%;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      background: #6366f1;
+      color: white;
+    }
+  </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <h2>🎓 Tathagat AI Assistant</h2>
+<div class="chat">
+  <h3>🎓 Tathagat AI Assistant</h3>
+  <div id="box"></div>
 
-    <div id="chat-box"></div>
-
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="Ask something..." />
-        <button onclick="sendMessage()">Send</button>
-    </div>
+  <input id="input" placeholder="Ask something..." />
+  <button onclick="send()">Send</button>
 </div>
 
 <script>
-async function sendMessage() {
-    let input = document.getElementById("user-input");
-    let message = input.value;
+const API_KEY = "AIzaSyBICKj3JVvhgJAlbA153Cfrzqh4Dqtg1Lw"; 
 
-    if (!message) return;
+async function send() {
+  let input = document.getElementById("input");
+  let msg = input.value.trim();
+  if (!msg) return;
 
-    let chatBox = document.getElementById("chat-box");
+  let box = document.getElementById("box");
+  box.innerHTML += `<div class="user">${msg}</div>`;
 
-    chatBox.innerHTML += `<div class="user">${message}</div>`;
+  input.value = "";
 
-    let res = await fetch("/chat", {
+  try {
+    let res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+      {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message})
-    });
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: msg }] }]
+        })
+      }
+    );
 
     let data = await res.json();
 
-    chatBox.innerHTML += `<div class="bot">${data.reply}</div>`;
+    let reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response";
 
-    input.value = "";
-    chatBox.scrollTop = chatBox.scrollHeight;
+    box.innerHTML += `<div class="bot">${reply}</div>`;
+    box.scrollTop = box.scrollHeight;
+
+  } catch (e) {
+    box.innerHTML += `<div class="bot">Error: ${e.message}</div>`;
+  }
 }
 </script>
 
